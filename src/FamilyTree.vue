@@ -20,14 +20,14 @@
         }">
             <div class="flex justify-center gap-8">
                 <family-node v-for="member in rootMembers" :key="member.id" :member-id="member.id"
-                    :family-data="familyData" />
+                    :family-data="{ familyTree }" />
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import { mapState, mapGetters } from 'pinia';
+import { storeToRefs } from 'pinia';
 // import { mockFamilyData } from './mockFamilyData';
 import { useFamilyStore } from './stores/familyStore';
 import FamilyNode from './components/FamilyNode.vue';
@@ -38,8 +38,11 @@ export default {
         FamilyNode
     },
     data() {
+        const store = useFamilyStore();
+        const { familyTree } = storeToRefs(store);
         return {
-            // familyData: mockFamilyData,
+            familyTree,
+            store,
             isDragging: false,
             position: {
                 x: 0,
@@ -56,20 +59,13 @@ export default {
         }
     },
     computed: {
-        ...mapState(useFamilyStore, {
-            familyData: state => ({
-                familyTree: {
-                    members: state.familyTree.members,
-                    metadata: state.familyTree.metadata
-                }
-            }),
-            familyTreeMetadata: state => state.familyTree.metadata
-        }),
-        ...mapGetters(useFamilyStore, ['getRootMembers']),
-
         rootMembers() {
-            return this.getRootMembers;
-        },
+            return Object.values(this.familyTree.members)
+                .filter(member =>
+                    !member.parents.father ||
+                    !this.familyTree.members[member.parents.father]
+                );
+        }
     },
     mounted() {
         this.centerTree();
