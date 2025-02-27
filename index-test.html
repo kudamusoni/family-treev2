@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="/src/styles.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <!-- <script type="module" src="/src/family.js"></script> -->
+  <style>
+    rect {
+      fill: white;
+      stroke: blue;
+      width: 80px;
+      height: 40px;
+      stroke-width: 2;
+    }
+
+    path {
+      fill: none;
+      stroke: silver;
+      stroke-width: 2;
+    }
+
+    text {
+      dominant-baseline: middle;
+      text-anchor: middle;
+    }
+
+    .bigger {
+      font-size: 20px;
+    }
+
+    .hide {
+      visibility: hidden;
+    }
+  </style>
+  <title>Family Tree</title>
+</head>
+
+<body>
+  <h1>hit</h1>
+  <!-- <div id="container"></div> -->
+  <script>
+    var svg = d3.select("body").append("svg")
+      .attr("width", 900).attr("height", 600)
+      .append("g").attr("transform", "translate(50, 50)");
+
+    var data = [
+      { "child": "John", "parent": "", "spouse": "Ixxy" },
+      { "child": "Sue", "parent": "John", "spouse": "Kolo" },
+      { "child": "Kevin", "parent": "John", "spouse": "Xija" },
+      { "child": "Pepe", "parent": "Sue" },
+      { "child": "Poop", "parent": "Sue", "spouse": "Yaya" },
+      { "child": "Pete", "parent": "Kevin" },
+      { "child": "Pang", "parent": "Kevin", "spouse": "Rita" },
+      { "child": "Pee", "parent": "Poop" },
+      { "child": "Pep", "parent": "Poop" },
+      { "child": null, "parent": "Pang" },
+    ];
+
+    var dataStruc = d3.stratify()
+      .id(function (d) { return d.child })
+      .parentId(function (d) { return d.parent })
+      (data);
+
+    var treeStruc = d3.tree().size([650, 300]);
+    var info = treeStruc(dataStruc);
+
+    var connectionLine = svg.append("g").selectAll("path")
+      .data(info.links());
+    connectionLine.enter().append("path")
+      .attr("d", function (d) {
+        return "M" + (d.source.x - 20) + "," + d.source.y + "h 60 v 50 H" +
+          d.target.x + " V" + d.target.y;
+      })
+      .classed("hide", function (d) {
+        return d.target.data.child == undefined ? true : false;
+      });
+
+    var connectionLine2 = svg.append("g").selectAll("path")
+      .data(info.links());
+    connectionLine2.enter().append("path")
+      .attr("d", function (d) {
+        return d.target.data.child == null ? "M" + (d.source.x) + "," + d.source.y + "h 80" :
+          "M" + (d.source.x + 40) + "," + d.source.y + "h 40";
+      });
+
+    var rectangles = svg.append("g").selectAll("rect").data(info.descendants());
+    rectangles.enter().append("rect")
+      .attr("x", function (d) { return d.x - 60; })
+      .attr("y", function (d) { return d.y - 20; })
+      .classed("hide", function (d) {
+        return d.data.child == undefined ? true : false;
+      });
+
+    var spouseRect = svg.append("g").selectAll("rect")
+      .data(info.descendants());
+    spouseRect.enter().append("rect")
+      .attr("x", function (d) { return d.x + 60; })
+      .attr("y", function (d) { return d.y - 20; })
+      .classed("hide", function (d) {
+        return d.data.spouse == undefined ? true : false;
+      });
+
+    var names = svg.append("g").selectAll("text")
+      .data(info.descendants());
+
+    names.enter().append("text")
+      .text(function (d) { return d.data.child; })
+      .attr("x", function (d) { return d.x - 20; })
+      .attr("y", function (d) { return d.y; })
+      .classed("bigger", true);
+
+    var spouseNames = svg.append("g").selectAll("text")
+      .data(info.descendants());
+    spouseNames.enter().append("text")
+      .text(function (d) { return d.data.spouse; })
+      .attr("x", function (d) { return d.x + 100; })
+      .attr("y", function (d) { return d.y; })
+      .classed("bigger", true);
+  </script>
+</body>
+
+</html>

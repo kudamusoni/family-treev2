@@ -5,7 +5,8 @@ import { mockFamilyData } from '../mockFamilyData';
 export const useFamilyStore = defineStore('family', {
     state: () => ({
         familyTree: mockFamilyData.familyTree,
-        selectedMemberId: null
+        selectedMemberId: null,
+        displayedMembers: new Set()
     }),
 
     getters: {
@@ -61,7 +62,6 @@ export const useFamilyStore = defineStore('family', {
 
             return id;
         },
-
         setParents(memberId, fatherId, motherId) {
             const member = this.familyTree.members[memberId];
             if (!member) return;
@@ -85,7 +85,6 @@ export const useFamilyStore = defineStore('family', {
                 }
             }
         },
-
         addSpouse(memberId, spouseData) {
             const spouseId = this.addMember(spouseData);
             const marriageDate = spouseData.marriageDate || new Date().toISOString().split('T')[0];
@@ -105,7 +104,6 @@ export const useFamilyStore = defineStore('family', {
 
             return spouseId;
         },
-
         updateMember(id, updates) {
             if (this.familyTree.members[id]) {
                 this.familyTree.members[id] = {
@@ -114,7 +112,6 @@ export const useFamilyStore = defineStore('family', {
                 };
             }
         },
-
         deleteMember(id) {
             // Remove from parents' children arrays
             const member = this.familyTree.members[id];
@@ -138,7 +135,6 @@ export const useFamilyStore = defineStore('family', {
             // Delete the member
             delete this.familyTree.members[id];
         },
-
         generateMemberId(firstName, lastName) {
             const base = `${firstName.toLowerCase()}-${lastName.toLowerCase()}`;
             let id = base;
@@ -151,6 +147,12 @@ export const useFamilyStore = defineStore('family', {
             }
 
             return id;
+        },
+        addDisplayedMember(id) {
+            this.displayedMembers.add(id)
+        },
+        clearDisplayedMembers() {
+            this.displayedMembers.clear()
         }
     }
 });

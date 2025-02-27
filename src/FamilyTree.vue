@@ -19,8 +19,13 @@
             cursor: isDragging ? 'grabbing' : 'grab'
         }">
             <div class="flex justify-center gap-8">
-                <family-node v-for="member in rootMembers" :key="member.id" :member-id="member.id"
-                    :family-data="{ familyTree }" />
+                <family-node 
+                    v-for="member in rootMembers"
+                    :key="member.id" 
+                    :member-id="member.id"
+                    :family-data="{ familyTree }" 
+                    source="root"
+                />
             </div>
         </div>
     </div>
@@ -67,17 +72,6 @@ export default {
                 );
         }
     },
-    mounted() {
-        this.centerTree();
-        window.addEventListener('resize', this.centerTree);
-        window.addEventListener('mousemove', this.onDrag);
-        window.addEventListener('mouseup', this.stopDrag);
-    },
-    beforeDestroy() {
-        window.removeEventListener('resize', this.centerTree);
-        window.removeEventListener('mousemove', this.onDrag);
-        window.removeEventListener('mouseup', this.stopDrag);
-    },
     methods: {
         centerTree() {
             const container = this.$el;
@@ -115,6 +109,22 @@ export default {
             // Animate back to center
             this.position = { ...this.initialPosition };
         }
+    },
+    mounted() {
+        this.centerTree();
+        window.addEventListener('resize', this.centerTree);
+        window.addEventListener('mousemove', this.onDrag);
+        window.addEventListener('mouseup', this.stopDrag);
+
+        console.log(this.store.displayedMembers);
+    },
+    beforeDestroy() {
+        window.removeEventListener('resize', this.centerTree);
+        window.removeEventListener('mousemove', this.onDrag);
+        window.removeEventListener('mouseup', this.stopDrag);
+    },
+    created() {
+        this.store.clearDisplayedMembers();
     }
 };
 </script>
